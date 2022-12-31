@@ -1,7 +1,7 @@
 <div align="center">
   <h1>nest.js</h1>
   <p>2023 新的开始，从nest开始</p>
-  <p></p>
+  <p>node v18.12.1 npm v9.2.0</p>
 </div>
 
 ## 目录
@@ -28,3 +28,5 @@
 - `wip` 开发中
 
 ## 相关参考
+
+[nest 文档](https://docs.nestjs.cn/)
