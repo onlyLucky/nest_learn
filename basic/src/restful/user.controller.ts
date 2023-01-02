@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Version, Request, Query, Headers, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Version, Request, Query, Headers, HttpCode, Req, Res, Session } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from "./dto/update-user.dto"
+import * as svgCaptcha from 'svg-captcha';
+import session from 'express-session';
 
 @Controller({
   path: 'user',
@@ -10,13 +12,47 @@ import { UpdateUserDto } from "./dto/update-user.dto"
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+  // session code 
+  @Get('code')
+  createCode(@Session() session) {
+    // 不懂res req 为什么不能用
+    const captcha = svgCaptcha.create({
+      size: 4,//字体
+      fontSize: 50,//生成字体大小
+      width: 100,//宽度
+      height: 34,//高度
+      background: "#cc9966"//背景颜色
+    })
+    session.code = captcha.text as string // 缓存session 验证码
+    return captcha.data
+  }
+
+  @Post("create")
+  handleCode(@Session() session, @Body() body) {
+    console.log(session.code, body)
+    let res = {
+      code: 200,
+      message: '',
+    }
+    if (session.code) {
+      if (session.code.toLocaleLowerCase() === body?.code?.toLocaleLowerCase()) {
+        res.message = '验证码正确'
+      } else {
+        res.message = '验证码错误'
+      }
+    } else {
+      res.message = '未获取到验证码'
+    }
+    return res
+  }
+
   @Post()
   create(@Body('name') createUserDto: CreateUserDto, @Request() req) {
     console.log(createUserDto, req)
     return this.userService.create(createUserDto);
   }
 
-  @Get()
+  /* @Get()
   @Version('2')
   findAll(@Request() req, @Query() query) {
     console.log(req.query, query)
@@ -29,7 +65,7 @@ export class UserController {
   findOne(@Param('id') id: string, @Headers() header) {
     console.log(id, header)
     return { code: 500 };
-  }
+  } */
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
