@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Version, Request, Query, Headers, HttpCode, Req, Res, Session } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Version, Request, Query, Headers, HttpCode, Req, Res, Session, Inject } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from "./dto/update-user.dto"
@@ -10,7 +10,12 @@ import session from 'express-session';
   version: "1"
 })
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    @Inject('RestCode') private readonly userService: UserService,
+    @Inject('JD') private readonly shopList: string[],
+    @Inject('Test') private readonly Test: any,
+    @Inject('sync') private readonly Sync: any
+  ) { }
 
   // session code 
   @Get('code')
@@ -66,6 +71,12 @@ export class UserController {
     console.log(id, header)
     return { code: 500 };
   } */
+  @Get()
+  findAll() {
+    // return this.shopList
+    // return this.Test.getApp()
+    return this.Sync
+  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
