@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["nestjs"]
+  "cSpell.words": ["nestjs"],
+  "vue.features.codeActions.enable": false
 }

@@ -7,8 +7,15 @@
 ## 目录
 
 - [目录](#目录)
+- [nest\_api](#nest_api)
 - [提交规范](#提交规范)
 - [相关参考](#相关参考)
+
+## nest_api
+
+官网文档记录
+
+- [01.controller](./nest_api/controller/) 控制器: 负责处理传入的请求和向客户端返回响应
 
 ## 提交规范
 
@@ -29,4 +36,6 @@
 
 ## 相关参考
 
-[nest 文档](https://docs.nestjs.cn/)
+- [nest 文档](https://docs.nestjs.cn/)
+- [GraphQL](https://graphql.cn/)
+- [nestjs sample](https://github.com/nestjs/nest/tree/master/sample)
