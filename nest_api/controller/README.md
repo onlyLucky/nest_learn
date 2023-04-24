@@ -158,3 +158,62 @@ export class HttpService<T> {
 | controllers | 必须创建的一组控制器                                       |
 | imports     | 导入模块的列表，这些模块导出了此模块中所需提供者           |
 | exports     | 由本模块提供并应在其他模块中可用的提供者的子集。           |
+
+可以将从模块导出的提供程序视为模块的公共接口或 API
+
+> 要使用 CLI 创建模块，只需执行 $ nest g module cats 命令。
+
+## 共享模块
+
+把 CatsService 放到 exports 数组中
+
+```typescript
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService],
+  exports: [CatsService],
+})
+export class CatsModule {}
+```
+
+每个导入 CatsModule 的模块都可以访问 CatsService ，并且它们将共享相同的 CatsService 实例。
+
+## 模块导出
+
+模块可以导出他们的内部提供者。 而且，他们可以再导出自己导入的模块。
+
+```typescript
+@Module({
+  imports: [CommonModule],
+  exports: [CommonModule],
+})
+export class CoreModule {}
+```
+
+## 依赖注入
+
+提供者也可以注入到模块(类)中（例如，用于配置目的）：但是，由于循环依赖性，模块类不能注入到提供者中。
+
+```typescript
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService],
+})
+export class CatsModule {
+  constructor(private readonly catsService: CatsService) {}
+}
+```
+
+## 全局模块
+
+@Global 装饰器使模块成为全局作用域。 全局模块应该只注册一次，最好由根或核心模块注册。 CatsService 组件将无处不在，而想要使用 CatsService 的模块则不需要在 imports 数组中导入 CatsModule。
+
+## 动态模块
