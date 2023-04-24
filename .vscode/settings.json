@@ -1,4 +1,13 @@
 {
   "cSpell.words": ["abecd", "nestjs"],
-  "vue.features.codeActions.enable": false
+  "vue.features.codeActions.enable": false,
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "restart": true,
+      "stopOnEntry": false,
+      "protocol": "inspector"
+    }
+  ]
 }

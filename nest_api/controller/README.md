@@ -1,8 +1,10 @@
+# 控制器（Controller）
+
 ## Request
 
 Nest 提供的装饰器及其代表的底层平台特定对象的对照列表。
 
-| Syntax                    | Description                       |
+| 装饰器                    | http                              |
 | ------------------------- | --------------------------------- |
 | `@Request()，@Req()`      | `res`                             |
 | `@Next()`                 | `next`                            |
@@ -118,3 +120,41 @@ export class CreateCatDto {
   readonly breed: string;
 }
 ```
+
+# 提供者（Providers）
+
+控制器应处理 HTTP 请求并将更复杂的任务委托给 providers。
+
+@Injectable() provider 装饰器
+
+> 要使用 CLI 创建服务类，只需执行 $ nest g service cats 命令。
+
+## 可选提供者
+
+constructor 的参数中使用 @Optional() 装饰器。
+
+```typescript
+import { Injectable, Optional, Inject } from '@nestjs/common';
+
+@Injectable()
+export class HttpService<T> {
+  constructor(
+    @Optional() @Inject('HTTP_OPTIONS') private readonly httpClient: T,
+  ) {}
+}
+```
+
+# 模块 (Module)
+
+具有 @Module() 装饰器的类。 @Module() 装饰器提供了元数据，Nest 用它来组织应用程序结构。
+
+每个 Nest 应用程序至少有一个模块，即根模块
+
+@module() 装饰器接受一个描述模块属性的对象：
+
+| 属性        | 描述                                                       |
+| ----------- | ---------------------------------------------------------- |
+| providers   | 由 Nest 注入器实例化的提供者，并且可以至少在整个模块中共享 |
+| controllers | 必须创建的一组控制器                                       |
+| imports     | 导入模块的列表，这些模块导出了此模块中所需提供者           |
+| exports     | 由本模块提供并应在其他模块中可用的提供者的子集。           |
