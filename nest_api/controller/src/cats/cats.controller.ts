@@ -2,7 +2,7 @@
  * @Author: fg
  * @Date: 2023-04-21 14:49:52
  * @LastEditors: fg
- * @LastEditTime: 2023-04-25 15:26:25
+ * @LastEditTime: 2023-04-25 17:33:53
  * @Description: 控制器: 负责处理传入的请求和向客户端返回响应。
  */
 
@@ -10,13 +10,14 @@
 /* 
 @Controller() 装饰器定义一个基本的控制器
 */
-import { Controller, Get, Req, Post, Body, HttpCode, Param, Put, Delete, Inject } from "@nestjs/common";
+import { Controller, Get, Req, Post, Body, HttpCode, Param, Put, Delete, Inject, HttpException, HttpStatus } from "@nestjs/common";
 // 获取express中的 Request类型的数据
 import { Request } from "express";
 import { CreateCatDto } from "./dto/create-cats.dto";
 import { CatsService } from "./cats.service";
 import { LoggerMiddleware } from "./logger.middleware";
 import { Cat } from "./interfaces/cat.interface"
+import { ForbiddenException } from "./forbidden.exception"
 
 
 /* 路由 */
@@ -33,8 +34,13 @@ export class CatsController {
   */
   @Get()
   @HttpCode(200)
-  findAll(@Req() request: Request): string {
-    return 'This action returns all cats'
+  async findAll(@Req() request: Request) {
+    // return 'This action returns all cats'
+    /* throw new HttpException({
+      status: HttpStatus.FORBIDDEN,
+      error: 'This is a custom message'
+    }, HttpStatus.FORBIDDEN) */
+    throw new ForbiddenException();
   }
 
   @Post()

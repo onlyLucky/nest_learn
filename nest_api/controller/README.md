@@ -318,3 +318,79 @@ const app = await NestFactory.create(AppModule);
 app.use(logger);
 await app.listen(3000);
 ```
+
+# 异常过滤器
+
+内置的异常层负责处理整个应用程序中的所有抛出的异常。当捕获到未处理的异常时，最终用户将收到友好的响应。
+
+## 基础异常类
+
+HttpException 构造函数有两个必要的参数来决定响应:
+
+- `response` 参数定义 `JSON` 响应体。它可以是 `string` 或 `object`，如下所述。
+
+- `status`参数定义 HTTP 状态代码。
+
+- 默认情况下，`JSON` 响应主体包含两个属性：
+
+- `statusCode`：默认为 `status` 参数中提供的 `HTTP` 状态代码
+
+- `message`:基于状态的 `HTTP` 错误的简短描述
+
+## 自定义异常
+
+如果确实需要创建自定义的异常，则最好创建自己的异常层次结构，其中自定义异常继承自 HttpException 基类。
+
+## 内置 HTTP 异常
+
+为了减少样板代码，Nest 提供了一系列继承自核心异常 HttpException 的可用异常。所有这些都可以在 @nestjs/common 包中找到：
+
+- BadRequestException
+- UnauthorizedException
+- NotFoundException
+- ForbiddenException
+- NotAcceptableException
+- RequestTimeoutException
+- ConflictException
+- GoneException
+- PayloadTooLargeException
+- UnsupportedMediaTypeException
+- UnprocessableException
+- InternalServerErrorException
+- NotImplementedException
+- BadGatewayException
+- ServiceUnavailableException
+- GatewayTimeoutException
+
+## 异常过滤器
+
+```typescript
+// http-exception.filter.ts
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
+  }
+}
+```
+
+> 所有异常过滤器都应该实现通用的 ExceptionFilter<T> 接口,它需要你使用有效签名提供 catch(exception: T, host: ArgumentsHost)方法。T 表示异常的类型。
+
+@Catch() 可以传递多个参数，所以你可以通过逗号分隔来为多个类型的异常设置过滤器。
