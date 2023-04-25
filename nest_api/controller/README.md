@@ -217,3 +217,104 @@ export class CatsModule {
 @Global 装饰器使模块成为全局作用域。 全局模块应该只注册一次，最好由根或核心模块注册。 CatsService 组件将无处不在，而想要使用 CatsService 的模块则不需要在 imports 数组中导入 CatsModule。
 
 ## 动态模块
+
+# 中间件
+
+在路由处理程序 之前 调用的函数
+
+中间件函数可以执行以下任务:
+
+- 执行任何代码。
+- 对请求和响应对象进行更改。
+- 结束请求-响应周期。
+- 调用堆栈中的下一个中间件函数。
+- 如果当前的中间件函数没有结束请求-响应周期, 它必须调用 next() 将控制传递给下一个中间件函数。否则, 请求将被挂起。
+
+## 依赖注入
+
+Nest 中间件完全支持依赖注入。 就像提供者和控制器一样，它们能够注入属于同一模块的依赖项（通过 constructor ）。
+
+## 中间件使用
+
+```typescript
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { LoggerMiddleware } from './logger.middleware';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService],
+  exports: [CatsService],
+})
+export class CatsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('cats');
+  }
+}
+```
+
+> 可以使用 async/await 来实现 configure()方法的异步化(例如，可以在 configure()方法体中等待异步操作的完成)。
+
+## 路由通配符
+
+```typescript
+forRoutes({ path: 'ab*cd', method: RequestMethod.ALL });
+```
+
+## 中间件消费者
+
+forRoutes() 可接受一个字符串、多个字符串、对象、一个控制器类甚至多个控制器类。在大多数情况下，您可能只会传递一个由逗号分隔的控制器列表。以下是单个控制器的示例：
+
+以下是单个控制器的示例：
+
+```typescript
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { CatsModule } from './cats/cats.module';
+import { CatsController } from './cats/cats.controller.ts';
+
+@Module({
+  imports: [CatsModule],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes(CatsController);
+  }
+}
+```
+
+> 该 apply() 方法可以使用单个中间件，也可以使用多个参数来指定多个多个中间件
+
+可以使用该 exclude() 方法轻松排除某些路由
+
+```typescript
+consumer
+  .apply(LoggerMiddleware)
+  .exclude(
+    { path: 'cats', method: RequestMethod.GET },
+    { path: 'cats', method: RequestMethod.POST },
+    'cats/(.*)',
+  )
+  .forRoutes(CatsController);
+```
+
+> 该 exclude() 方法使用 path-to-regexp 包支持通配符参数。
+
+## 多个中间件
+
+为了绑定顺序执行的多个中间件，我们可以在 apply() 方法内用逗号分隔它们。
+
+```typescript
+consumer.apply(cors(), helmet(), logger).forRoutes(CatsController);
+```
+
+## 全局中间件
+
+如果我们想一次性将中间件绑定到每个注册路由，我们可以使用由 INestApplication 实例提供的 use()方法：
+
+```typescript
+const app = await NestFactory.create(AppModule);
+app.use(logger);
+await app.listen(3000);
+```
