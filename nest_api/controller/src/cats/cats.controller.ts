@@ -2,7 +2,7 @@
  * @Author: fg
  * @Date: 2023-04-21 14:49:52
  * @LastEditors: fg
- * @LastEditTime: 2023-04-25 17:33:53
+ * @LastEditTime: 2023-04-25 22:24:48
  * @Description: 控制器: 负责处理传入的请求和向客户端返回响应。
  */
 
@@ -10,7 +10,7 @@
 /* 
 @Controller() 装饰器定义一个基本的控制器
 */
-import { Controller, Get, Req, Post, Body, HttpCode, Param, Put, Delete, Inject, HttpException, HttpStatus } from "@nestjs/common";
+import { Controller, Get, Req, Post, Body, HttpCode, Param, Put, Delete, Inject, HttpException, HttpStatus, UseFilters } from "@nestjs/common";
 // 获取express中的 Request类型的数据
 import { Request } from "express";
 import { CreateCatDto } from "./dto/create-cats.dto";
@@ -18,6 +18,8 @@ import { CatsService } from "./cats.service";
 import { LoggerMiddleware } from "./logger.middleware";
 import { Cat } from "./interfaces/cat.interface"
 import { ForbiddenException } from "./forbidden.exception"
+import { HttpExceptionFilter } from "./http-exception.filter"
+import { AllExceptionsFilter } from "./any-exception.filter"
 
 
 /* 路由 */
@@ -33,10 +35,10 @@ export class CatsController {
   @Get('profile') 组合会为 GET /cats/profile 请求生成路由映射
   */
   @Get()
-  @HttpCode(200)
+  @UseFilters(new AllExceptionsFilter)
   async findAll(@Req() request: Request) {
     // return 'This action returns all cats'
-    /* throw new HttpException({
+    /* throw new HttpException({s
       status: HttpStatus.FORBIDDEN,
       error: 'This is a custom message'
     }, HttpStatus.FORBIDDEN) */

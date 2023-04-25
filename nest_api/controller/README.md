@@ -394,3 +394,104 @@ export class HttpExceptionFilter implements ExceptionFilter {
 > 所有异常过滤器都应该实现通用的 ExceptionFilter<T> 接口,它需要你使用有效签名提供 catch(exception: T, host: ArgumentsHost)方法。T 表示异常的类型。
 
 @Catch() 可以传递多个参数，所以你可以通过逗号分隔来为多个类型的异常设置过滤器。
+
+## 绑定过滤器
+
+```typescript
+// cats.controller.ts
+@Get()
+  @UseFilters(new HttpExceptionFilter)
+  async findAll(@Req() request: Request) {
+    // return 'This action returns all cats'
+    /* throw new HttpException({s
+      status: HttpStatus.FORBIDDEN,
+      error: 'This is a custom message'
+    }, HttpStatus.FORBIDDEN) */
+    throw new ForbiddenException();
+  }
+```
+
+使用了 @UseFilters() 装饰器。和 @Catch()装饰器类似，它可以使用单个过滤器实例，也可以使用逗号分隔的过滤器实例列表
+
+### 全局使用
+
+```typescript
+// main.ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new HttpExceptionFilter());
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+但是 useGlobalFilters() 方法不会为网关和混合应用程序设置过滤器。
+
+为了解决这个问题，你可以注册一个全局范围的过滤器直接为任何模块设置过滤器：
+
+```typescript
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+
+@Module({
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
+})
+export class AppModule {}
+```
+
+## 捕获异常
+
+为了捕获每一个未处理的异常(不管异常类型如何)，将 @Catch() 装饰器的参数列表设为空，例如 @Catch()。
+
+```typescript
+// any-exception.filter.ts
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+    const request = ctx.getRequest();
+
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    response.status(status).json({
+      statusCode: status,
+      timestamps: new Date().toISOString(),
+      path: request.url,
+    });
+  }
+}
+```
+
+使用方式同上面的方式一样
+
+## 继承
+
+```typescript
+import { Catch, ArgumentsHost } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
+
+@Catch()
+export class AllExceptionsFilter extends BaseExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    super.catch(exception, host);
+  }
+}
+```
