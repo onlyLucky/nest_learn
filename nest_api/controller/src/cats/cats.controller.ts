@@ -2,7 +2,7 @@
  * @Author: fg
  * @Date: 2023-04-21 14:49:52
  * @LastEditors: fg
- * @LastEditTime: 2023-04-24 15:39:16
+ * @LastEditTime: 2023-04-25 15:26:25
  * @Description: 控制器: 负责处理传入的请求和向客户端返回响应。
  */
 
@@ -15,13 +15,17 @@ import { Controller, Get, Req, Post, Body, HttpCode, Param, Put, Delete, Inject 
 import { Request } from "express";
 import { CreateCatDto } from "./dto/create-cats.dto";
 import { CatsService } from "./cats.service";
+import { LoggerMiddleware } from "./logger.middleware";
 import { Cat } from "./interfaces/cat.interface"
+
 
 /* 路由 */
 // 路由路径前缀设置为cats /cats
 @Controller('cats')
 export class CatsController {
-  constructor(private readonly catsService: CatsService) { }
+  constructor(
+    private readonly catsService: CatsService
+  ) { }
   /* 
   @Get() HTTP 请求方法装饰器告诉 Nest 为 HTTP 请求的特定端点创建处理程序
   Nest 会将 GET /cats 请求映射到此处理程序
