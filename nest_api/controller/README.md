@@ -495,3 +495,26 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
   }
 }
 ```
+
+# 管道
+
+管道是具有 @Injectable() 装饰器的类。管道应实现 PipeTransform 接口。
+
+管道有两个典型的应用场景:
+
+- 转换：管道将输入数据转换为所需的数据输出(例如，将字符串转换为整数)
+- 验证：对输入数据进行验证，如果验证成功继续传递; 验证失败则抛出异常
+
+Nest 自带很多开箱即用的内置管道。你还可以构建自定义管道。
+
+## 内置管道
+
+- ValidationPipe
+- ParseIntPipe
+- ParseFloatPipe
+- ParseBoolPipe
+- ParseArrayPipe
+- ParseUUIDPipe
+- ParseEnumPipe
+- DefaultValuePipe
+- ParseFilePipe
