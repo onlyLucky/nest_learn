@@ -518,3 +518,25 @@ Nest 自带很多开箱即用的内置管道。你还可以构建自定义管道
 - ParseEnumPipe
 - DefaultValuePipe
 - ParseFilePipe
+
+## 绑定管道
+
+```typescript
+@Get(':id')
+findOne(@Param('id', ParseIntPipe) id: number) {
+  return `This action returns a #${id} cat`
+}
+```
+
+如果传参错误,将实例化留给框架去处理
+
+```typescript
+@Get(':id')
+findOne(@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: number) {
+  return `This action returns a #${id} cat`
+}
+```
+
+ParseUUIDPipe 解析字符串并验证是否为 UUID 的例子
+
+## 自定义管道
